@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:x="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pm="http://primefaces.org/mobile">
+
+<h:head>
+	<title>Cadastrar Pedido</title>
+	<meta charset="utf-8"></meta>
+	<link rel="stylesheet" href="css/materialize.css" />
+	<link rel="stylesheet" href="css/style.css" />
+</h:head>
+
+<h:body>
+
+	<p:growl id="itemPedidoNulo" />
+
+	<p:growl id="dadosClienteNulo" />
+
+	<div class="container">
+		<h1 style="text-align: center">Dados Cliente</h1>
+		<div class="row">
+			<div class="col s12">
+
+				<!--COMBOBOX CLIENTES CADASTRADOS-->
+				<h:form>
+					<p:selectOneMenu styleClass="centro"
+						panelStyleClass="panel"
+						value="#{indexController.clienteController.clienteId}">
+						<f:selectItem itemValue="0" itemLabel="Clientes Cadastrados" />
+						<f:selectItems
+							value="#{indexController.clienteController.clientes}"
+							var="cliente" itemValue="#{cliente.id}"
+							itemLabel="#{cliente.nome}" />
+						<f:ajax event="change"
+							listener="#{indexController.clienteController.selecionarCliente}"
+							render="cliente" execute="@this"></f:ajax>
+					</p:selectOneMenu>
+				</h:form>
+
+
+
+				<!--DADOS DO CLIENTE QUE FARÁ O PEDIDO-->
+				<h:form id="cliente">
+					<h3 style="text-align: center;">#{indexController.clienteController.cliente.nome}</h3>
+					<ui:repeat var="cpf"
+						value="#{indexController.clienteController.cliente.cpf}">
+						<label for="cpf">Cpf: </label>
+						<h:inputText
+							rendered="#{not empty indexController.clienteController.cliente.cpf}"
+							value="#{indexController.clienteController.cliente.cpf}"
+							readonly="true"></h:inputText>
+					</ui:repeat>
+					<ui:repeat varStatus="status" var="telefone"
+						value="#{indexController.clienteController.cliente.telefones}">
+						<label for="telefone">Telefone: #{status.index+1}</label>
+						<p:inputText id="telefone" value="#{telefone}"></p:inputText>
+					</ui:repeat>
+				</h:form>
+			</div>
+		</div>
+
+
+
+		<!--MODAL PARA CADASTRO DE NOVO CLIENTE-->
+		<div class="row">
+			<div class="col s12">
+				<h:form id="form">
+				<p:commandButton style="float:right" action="#{indexController.mostrarPedidos}"
+					 update="@all" value="Lista de Pedidos" />
+					<p:commandButton style="float:left;" update=":form:clienteAdd"
+						icon="ui-icon-person" value="Novo Cliente"
+						oncomplete="PF('addClienteDialog').show()" />
+
+					<p:dialog header="Novo Cliente" widgetVar="addClienteDialog"
+						modal="true" showEffect="fade" hideEffect="fade" resizable="false">
+						<p:outputPanel id="clienteAdd" style="text-align:center;">
+							<p:panelGrid columns="2" columnClasses="label,value">
+
+								<h:outputText value="Nome :" />
+								<h:inputText id="nome" styleClass="inputBorder"
+									value="#{indexController.clienteController.novoCliente.nome}" />
+								<h:outputText value="Cpf :" />
+								<h:inputText styleClass="inputBorder"
+									value="#{indexController.clienteController.novoCliente.cpf}" />
+
+								<h:outputText value="Telefone 1 :" />
+								<h:inputText styleClass="inputBorder"
+									value="#{indexController.clienteController.telefone1}" />
+
+								<h:outputText value="Telefone 2 :" />
+								<h:inputText styleClass="inputBorder"
+									value="#{indexController.clienteController.telefone2}" />
+
+							</p:panelGrid>
+							<p:commandButton value="Confirmar"
+								update=":dadosClienteNulo, @all"
+								action="#{indexController.clienteController.salvarCliente}"
+								onclick="PF('modal').hide();$('#form').trigger('reset')"></p:commandButton>
+						</p:outputPanel>
+					</p:dialog>
+				</h:form>
+			</div>
+		</div>
+
+
+
+
+		<!-- TABELA DE LIVROS CADASTRADOS -->
+		<div style="margin-top: 200px" class="row">
+			<h:form id="form2">
+				<p:dataTable id="singleDT" var="livro"
+					value="#{indexController.livroController.livros}"
+					selectionMode="single"
+					selection="#{indexController.livroController.livroLista}"
+					rowKey="#{livro.id}">
+					<f:facet name="header">
+            Livros Disponíveis
+        </f:facet>
+					<p:column headerText="Id">
+						<h:outputText value="#{livro.id}" />
+					</p:column>
+					<p:column headerText="Título">
+						<h:outputText value="#{livro.nome}" />
+					</p:column>
+					<p:column headerText="Editora">
+						<h:outputText value="#{livro.editora}" />
+					</p:column>
+					<p:column headerText="Preço">
+						<h:outputText value="#{livro.valor}" />
+					</p:column>
+					<f:facet name="footer">
+						<p:commandButton
+							action="#{indexController.livroController.updateItensPedidos}"
+							process="singleDT" update=":itemPedidoNulo, livrosPedidos"
+							value="Adicionar ao Carrinho" />
+					</f:facet>
+				</p:dataTable>
+			</h:form>
+		</div>
+
+
+
+
+		<!-- TABELA DE NOVO PEDIDO (LIVROS SELECIONADOS) -->
+		<div style="margin-top: 50px">
+			<h4 style="text-align: center">Carrinho</h4>
+			<h:dataTable style="border: 2px solid grey;"
+				styleClass="responsive-table" id="livrosPedidos"
+				value="#{indexController.livroController.livroPedido}"
+				var="itemPedido">
+				<h:column>
+					<f:facet name="header">
+						<h:outputText value="Título" />
+					</f:facet>
+					<h:outputText value="#{itemPedido.nome}" />
+				</h:column>
+				<h:column>
+					<f:facet name="header">
+						<h:outputText value="Quantidade" />
+					</f:facet>
+					<h:outputText value="#{itemPedido.quantidade}" />
+				</h:column>
+				<h:column>
+					<f:facet name="header">
+						<h:outputText value="Preço" />
+					</f:facet>
+					<h:outputText value="#{itemPedido.valorTotal}" />
+				</h:column>
+			</h:dataTable>
+		</div>
+		
+		<div class="row">
+			<h:form>
+				<p:commandButton action="#{indexController.enviarPedido}"
+					styleClass="centro enviarPedido"
+					update=":dadosClienteNulo, @all" value="Enviar Pedido" />
+			</h:form>
+			<h:form>
+				<p:commandButton style="float:left; margin-top:1%;" action="#{indexController.limparLista}"
+					update="livrosPedidos" value="Limpar Lista" />
+			</h:form>
+		</div>
+
+	</div>
+</h:body>
+<!-- -->
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:x="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pm="http://primefaces.org/mobile">
+
+<h:head>
+	<title>Pedidos</title>
+	<meta charset="utf-8"></meta>
+	<link rel="stylesheet" href="css/materialize.css" />
+	<link rel="stylesheet" href="css/style.css" />
+</h:head>
+
+<h:body>
+ 
+<p:dataTable id="pedidos"
+				value="#{pedidoController.pedidos}"
+				var="pedido" update="true">
+						<p:column>
+					<f:facet name="header">
+
+						<h:outputText value="Cliente" />
+						
+					</f:facet>
+					<h:outputText value="#{pedido.cliente.nome}" />
+					</p:column>
+				
+			<p:column>
+					<f:facet name="header">
+						<h:outputText value="Pedido" />
+					</f:facet>
+					<ui:repeat value="#{pedido.itens}" var="item">
+            					#{item.livro.nome} x #{item.quantidade}<br></br>
+        			</ui:repeat>
+				</p:column>
+				<p:column>
+					<f:facet name="header">
+						<h:outputText value="Valor" />
+					</f:facet>
+						#{pedido.valorTotalCurrency}
+				</p:column>
+</p:dataTable>
+<h:form>
+<p:commandButton action="#{pedidoController.voltar}"
+					styleClass="centro enviarPedido"
+					value="Voltar" />
+					</h:form>
+</h:body>
+</html>

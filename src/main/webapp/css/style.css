@@ -1,0 +1,14 @@
+.centro{
+	position: absolute;
+ 	left: 50%;
+ 	transform: translate(-50%, -50%);
+ 	width:350px;
+ 	margin:1%;
+}
+.enviarPedido{
+	margin:2%;
+}
+
+h3{
+	margin-top:10%;
+}
